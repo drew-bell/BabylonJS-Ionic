@@ -9,6 +9,7 @@ import { HomePage } from '../pages/home/home';
 import { DeviceProvider } from '../providers/device/device';
 import { LocationsProvider } from '../providers/locations/locations';
 import { PointsPage } from '../pages/points/points';
+import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { PointsPage } from '../pages/points/points';
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DeviceProvider,
-    LocationsProvider
+    LocationsProvider,
+    ScreenOrientation
   ]
 })
 export class AppModule {}
