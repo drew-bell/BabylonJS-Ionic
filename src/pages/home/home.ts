@@ -1,20 +1,25 @@
-import { Component,AfterViewInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Game } from '../../app/classes/game';
+import { PoiPage } from '../poi/poi';
+import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { Platform } from 'ionic-angular';
 
 @Component({
-  selector: 'page-home',
-  templateUrl: 'home.html'
+    selector: 'page-home',
+    templateUrl: 'home.html'
 })
-export class HomePage  implements AfterViewInit {
 
-  constructor(public navCtrl: NavController) {
+export class HomePage {
 
-  }
-  
-  ngAfterViewInit() {
-    let game = new Game('renderCanvas');
-    game.createScene();
-    game.animate();
-  }
+    constructor(public navCtrl: NavController, private screenOrientation: ScreenOrientation, public plt: Platform) {
+
+        // lock rotation on supported platforms
+        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT).then(result => console.log(result)).catch(error => console.log(error));
+
+    }
+
+    // navigate to page
+    points(event, item) {
+        this.navCtrl.push(PoiPage);
+    }
 }

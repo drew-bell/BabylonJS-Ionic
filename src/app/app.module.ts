@@ -6,11 +6,16 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { DeviceProvider } from '../providers/device/device';
+import { LocationsProvider } from '../providers/locations/locations';
+import { PoiPage } from '../pages/poi/poi';
+import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage
+    HomePage,
+    PoiPage
   ],
   imports: [
     BrowserModule,
@@ -19,12 +24,16 @@ import { HomePage } from '../pages/home/home';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    PoiPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    DeviceProvider,
+    LocationsProvider,
+    ScreenOrientation
   ]
 })
 export class AppModule {}
