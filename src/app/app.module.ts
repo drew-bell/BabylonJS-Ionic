@@ -8,14 +8,14 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { DeviceProvider } from '../providers/device/device';
 import { LocationsProvider } from '../providers/locations/locations';
-import { PointsPage } from '../pages/points/points';
+import { PoiPage } from '../pages/poi/poi';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    PointsPage
+    PoiPage
   ],
   imports: [
     BrowserModule,
@@ -25,7 +25,7 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
   entryComponents: [
     MyApp,
     HomePage,
-    PointsPage
+    PoiPage
   ],
   providers: [
     StatusBar,

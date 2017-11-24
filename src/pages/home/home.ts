@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { PointsPage } from '../points/points';
+import { PoiPage } from '../poi/poi';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Platform } from 'ionic-angular';
 
@@ -20,6 +20,6 @@ export class HomePage {
 
     // navigate to page
     points(event, item) {
-        this.navCtrl.push(PointsPage);
+        this.navCtrl.push(PoiPage);
     }
 }
