@@ -1,5 +1,3 @@
-import { Vector3 } from 'babylonjs';
-
 /**
  * GPS coordinates
  */
@@ -59,7 +57,7 @@ export class Point {
     relativeLatLonTo(device: Point): Point {
         let lat = this.scale * (this._latitude - device.latitude());
         let lon = this.scale * (this._longitude - device.longitude());
-        return new Point(lat, this._altitude, lon);
+        return new Point(lat, lon, this._altitude);
     }
 
 	/**
@@ -108,7 +106,7 @@ export class Point {
     }
 
     // bearing toward point from this
-    bearingTo(point) {
+    bearingTo(point: Point): number {
 
         let lat1 = this.toRadians(this.latitude());
         let lat2 = this.toRadians(point.latitude());
@@ -123,7 +121,28 @@ export class Point {
         //normalised to compass
         return (bng + 360) % 360;
     }
+
     getlocationAtDistanceFrom(point: Point, distance: number, bearing: number): Point {
-        return new Point();
+        let radius = 6371e3 ;
+        var ad = Number(distance) / radius; // angular distance in radians
+        var bng = this.toRadians(bearing);
+    
+        var lat1 = this.toRadians(point.latitude());
+        var lon1 = this.toRadians(point.longitude());
+    
+        var sinlat1 = Math.sin(lat1),
+          coslat1 = Math.cos(lat1);
+        var sinad = Math.sin(ad),
+          cosad = Math.cos(ad);
+        var sinbng = Math.sin(bng),
+          cosbng = Math.cos(bng);
+    
+        var sinlat2 = sinlat1 * cosad + coslat1 * sinad * cosbng;
+        var lat2 = Math.asin(sinlat2);
+        var y = sinbng * sinad * coslat1;
+        var x = cosad - sinlat1 * sinlat2;
+        var lon2 = lon1 + Math.atan2(y, x);
+    
+        return new Point(this.toDegrees(lat2), (this.toDegrees(lon2) + 540) % 360 - 180 , this._altitude);
     }
 }

@@ -9,6 +9,9 @@ import { DeviceProvider } from '../providers/device/device';
 import { LocationsProvider } from '../providers/locations/locations';
 import { PoiPage } from '../pages/poi/poi';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { GameProvider } from '../providers/game/game';
+import { Geolocation } from '@ionic-native/geolocation';
+
 
 @NgModule({
   declarations: [
@@ -32,7 +35,9 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DeviceProvider,
     LocationsProvider,
-    ScreenOrientation
+    ScreenOrientation,
+    GameProvider,
+    Geolocation
   ]
 })
 export class AppModule { }

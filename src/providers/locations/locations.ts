@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
 */
 @Injectable()
 export class LocationsProvider {
-    public Locations = [{
+    public locations = [{
         "id": 1,
         "latitude": 43.022139,
         "longitude": 141.322111,
@@ -67,10 +67,6 @@ export class LocationsProvider {
     ];
 
     constructor() {
-        console.log('Hello LocationsProvider Provider');
     }
 
-    getLocations(){
-        return this.Locations;
-    }
 }

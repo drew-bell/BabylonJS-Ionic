@@ -14,37 +14,39 @@ export class DeviceProvider {
     // gps of JRTower
     private _JRTower: Point = new Point(43.068333, 141.351111, 0);
     private _locationsub;
+    public location: Point;
 
-    constructor(private _location: Point, private geolocation: Geolocation) {
-        console.log('Hello DeviceProvider Provider');
-        this.geolocation.getCurrentPosition().then((position) => {
-            if (Math.abs(position.coords.latitude - this._JRTower.latitude()) > 0.0003
-                || Math.abs(position.coords.longitude - this._JRTower.longitude()) > 0.0003) {
-                this._location = this._JRTower;
-            } else {
-                this._location = new Point(position.coords.latitude, position.coords.longitude, position.coords.altitude);
-            }
-        }).catch((error) => {
-            console.log('Error getting location', error);
-        });
+    constructor(private geolocation: Geolocation) {
+        this.location = this._JRTower;
+        // this.geolocation.getCurrentPosition().then((position) => {
+        //     if (Math.abs(position.coords.latitude - this._JRTower.latitude()) > 0.0003
+        //         || Math.abs(position.coords.longitude - this._JRTower.longitude()) > 0.0003) {
+        //         this.location = this._JRTower;
+        //     } else {
+        //         this.location = new Point(position.coords.latitude, position.coords.longitude, position.coords.altitude);
+        //     }
+        // }).catch((error) => {
+        //     console.log('Error getting location', error);
+        // });
 
 
-        this._locationsub = this.geolocation.watchPosition()
-            .subscribe(position => {
+        // this._locationsub = this.geolocation.watchPosition()
+        //     .subscribe(position => {
 
-                if (Math.abs(position.coords.latitude - this._JRTower.latitude()) > 0.0003
-                    || Math.abs(position.coords.longitude - this._JRTower.longitude()) > 0.0003) {
-                    return;
-                } else if (Math.abs(position.coords.latitude - this._location.latitude()) < 0.0001
-                    || Math.abs(position.coords.longitude - this._location.longitude()) < 0.0001) {
-                    return;
-                }
+        //         if (Math.abs(position.coords.latitude - this._JRTower.latitude()) > 0.0003
+        //             || Math.abs(position.coords.longitude - this._JRTower.longitude()) > 0.0003) {
+        //             return;
+        //         } else if (Math.abs(position.coords.latitude - this.location.latitude()) < 0.0001
+        //             || Math.abs(position.coords.longitude - this.location.longitude()) < 0.0001) {
+        //             return;
+        //         }
 
-                this._location.latitude(position.coords.latitude);
-                this._location.longitude(position.coords.longitude);
-                this._location.altitude(position.coords.altitude);
-                console.log(position.coords.longitude + ' ' + position.coords.latitude);
-            });
+        //         this.location.latitude(position.coords.latitude);
+        //         this.location.longitude(position.coords.longitude);
+        //         this.location.altitude(position.coords.altitude);
+
+        //     });
+
     }
 
 }

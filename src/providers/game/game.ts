@@ -4,7 +4,6 @@ import {
     DeviceOrientationCamera, ArcRotateCamera, StandardMaterial, Texture, Color3
 } from 'babylonjs';
 import { Marker } from '../../app/classes/marker';
-import { Point } from '../../app/classes/point';
 import { Injectable } from '@angular/core';
 import { DeviceProvider } from '../device/device';
 
@@ -18,11 +17,14 @@ export class GameProvider {
     private _light: Light;
 
     constructor(canvasElement: string) {
+
+        // canvasElement = (canvasElement === undefined ? 'renderCanvas' : canvasElement);
         this._canvas = <HTMLCanvasElement>document.getElementById(canvasElement);
         this._engine = new Engine(this._canvas, true);
     }
 
     createScene(): void {
+
         // create a basic BJS Scene object
         this._scene = new Scene(this._engine);
 
@@ -30,6 +32,8 @@ export class GameProvider {
 
         // movement camera
         this._camera = new DeviceOrientationCamera("DevOr_camera", new Vector3(0, 0, 0), this._scene);
+        
+        this._camera.fov =1.5;
 
         // add to camera array
         this._scene.activeCameras.push(this._camera);
@@ -39,7 +43,7 @@ export class GameProvider {
 
         // set the sensitivity
         this._camera.angularSensibility = 10;
-
+    
         // This attaches the camera to the canvas
         this._camera.attachControl(this._canvas, false);
 
@@ -52,15 +56,6 @@ export class GameProvider {
         // clear background
         this._scene.clearColor = new Color4(0, 0, 0, 0.0000000000000001);
 
-        // create a built-in "sphere" shape; with 16 segments and diameter of 2
-        let sphere = MeshBuilder.CreateSphere('sphere',
-            { segments: 16, diameter: 2 }, this._scene);
-
-        // place on north
-        sphere.position.z = 5;
-
-        // ground
-        let ground = MeshBuilder.CreateGround("ground", { width: 200, height: 200 }, this._scene);
     }
 
     // animation loops
@@ -77,8 +72,9 @@ export class GameProvider {
     }
 
     // add minimap
-    minimap(): void {
-        var zoom = 200;
+    minimap(zoom?: number): void {
+
+        zoom = (zoom === undefined ? 100 : zoom);
 
         // minimap camera
         this._minimap = new ArcRotateCamera("minimap_cam", 0, 0, 0, new Vector3(0, zoom + 1, 0), this._scene);
@@ -92,15 +88,74 @@ export class GameProvider {
         this._minimap.layerMask = 2;
 
         this._minimap.viewport = new Viewport(0, 0, (2) / (this._canvas.width / 100) / 1.3, (2) / (this._canvas.height / 100) / 1.3);
+
+        // ground
+        let groundTexture = new BABYLON.Texture("/assets/imgs/radar_north.png", this._scene);
+        var groundMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
+        groundMaterial.emissiveTexture = groundTexture;
+        groundMaterial.opacityTexture = groundTexture;
+        groundMaterial.backFaceCulling = true;
+
+        // background for the radar
+        var ground = BABYLON.MeshBuilder.CreateGround("radar_ring", {
+            height: zoom - 5,
+            width: zoom - 5,
+            subdivisions: 4
+        }, this._scene);
+        ground.material = groundMaterial;
+        ground.position.y = 1;
+        ground.layerMask = 2;
+        ground.isPickable = false;
+
+        // radar ring
+        var planeTexture = new BABYLON.Texture("/assets/imgs/radar_bg.png", this._scene);
+        var planeMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
+        planeMaterial.emissiveTexture = planeTexture;
+        planeMaterial.opacityTexture = planeTexture;
+        planeMaterial.backFaceCulling = true;
+
+        var plane = BABYLON.MeshBuilder.CreateGround("radar_background", {
+            height: zoom - 5,
+            width: zoom - 5,
+            subdivisions: 4
+        }, this._scene);
+        plane.material = planeMaterial;
+        plane.layerMask = 2;
+        plane.isPickable = false;
+
+        // This applies a mask to the minimap to make it a cutout circle
+        var cutlayer = new BABYLON.Layer("top", null, this._scene, true);
+        var laytex = new BABYLON.Texture("/assets/imgs/roundmask.png", this._scene);
+        cutlayer.texture = laytex;
+        cutlayer.alphaTest = true;
+
+        cutlayer.onBeforeRender = () => {
+            this._engine.setColorWrite(false);
+            if (this._scene.activeCamera == this._minimap) {
+                this._engine.setDepthBuffer(true);
+            }
+        }
+
+        cutlayer.onAfterRender = () => {
+            this._engine.setColorWrite(true);
+        };
     }
 
     addLight() {
 
         // create a basic light, aiming 0,1,0 - meaning, to the sky
-        this._light = new HemisphericLight("light", new Vector3(0, 10, 0), this._scene);
+        this._light = new HemisphericLight("light", new Vector3(0, 30, 0), this._scene);
 
         // set light strength
-        this._light.intensity = 0.6;
+        this._light.intensity = 0.4;
+
+        this._light.excludedMeshes = [];
+        this._light.excludeWithLayerMask = 1;
+        for (var i = 0; i < this._scene.meshes.length; i++) {
+            if (this._scene.meshes[i].layerMask == 1) {
+              this._light.excludedMeshes.push(this._scene.meshes[i]);
+            }
+          }
 
     }
 
@@ -164,15 +219,21 @@ export class GameProvider {
     }
 
     addMinimapMarker(marker: Marker, device: DeviceProvider): void {
+        
         let sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {
             diameter: 3
         }, this._scene);
+        
         let material = new BABYLON.StandardMaterial("minimaterial", this._scene);
+
         material.emissiveColor = Color3.White();
 
         // apply position
-        sphere.position = marker.location.toWorld(device.location());
-        sphere.position.y = 1;
+        let position = marker.location.relativeLatLonTo(device.location);
+
+        sphere.position = new Vector3(position.latitude(), position.altitude(), position.longitude());
+
+        sphere.position.y = 0.1;
 
         // apply material
         sphere.material = material;
@@ -186,45 +247,47 @@ export class GameProvider {
 
     addNameMarker(marker: Marker, device: DeviceProvider): void {
 
-        let texture = new Texture("/assets/imgs/"+marker.img, this._scene)
+        let texture = new Texture(marker.img, this._scene)
 
         let material = new BABYLON.StandardMaterial("mainmaterial", this._scene);
 
         material.opacityTexture = texture; // transparency
+      
         material.emissiveTexture = texture; // texture
+      
         material.backFaceCulling = true; // don't need the back
-        material
 
+        let mark = BABYLON.MeshBuilder.CreatePlane("box", {
+            width: 2,
+            height: 1
+        }, this._scene);
 
-   let mark = BABYLON.MeshBuilder.CreatePlane("box", {
-      width: 2,
-      height: 1
-      // depth: 1
-    }, this._scene);
+        mark.id = String(marker.id);
 
-    mark.id = String(marker.id);
+        // main camera layer
+        mark.layerMask = 1;
 
-  // main camera layer
-  mark.layerMask = 1;
+        // direction to point from device
+        let bearing = marker.location.bearingTo(device.location);
+        
+        // get a Device coord along the bearing at 900 units
+        let p = marker.location.getlocationAtDistanceFrom(device.location, 900, bearing);
 
-  // direction to point from device
-  let bearing = marker.location.bearingFrom(device.location());
+        // location to world
+        let position = p.relativeLatLonTo(device.location);
+        
+        // apply position to marker
+        mark.position = new Vector3(position.latitude(), position.longitude(), position.altitude());
 
-  // get a Device coord along the bearing at 900 units
-  let p = marker.location.getlocationAtDistanceFrom(device.location(), 900, bearing);
+        // prevent meshes overlapping
+        mark.position.y = -1;
 
-  // location to world
-  mark.position = p.toWorld(device.location());
+        // apply material
+        mark.material = material;
 
-  // prevent meshes overlapping
-  mark.position.y = -3;
-  
-  // apply material
-  mark.material = material;
-
-  // face the camera
-  mark.lookAt(Vector3.Zero());
-   }
+        // face the camera
+        mark.lookAt(Vector3.Zero());
+    }
 
     cardinals(): void {
         var nth = new Texture("/assets/imgs/north.png", this._scene)

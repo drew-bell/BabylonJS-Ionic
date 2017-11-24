@@ -2,20 +2,16 @@ import { Point } from './point';
 import { Vector3, Mesh, Color3, Scene } from 'babylonjs';
 
 export class Marker {
-    private _location: Point;
-    private _img: string;
-    private _name: String;
-    private _desc: String;
-    private _id: number;
+
     private _minimapMesh: Mesh;
     private _markerMesh: Mesh;
 
-    constructor(id: number, point: Point, name: String, desc: String, img: string) {
+    constructor(public id: number,public location: Point,public name: String,public desc: String,public img: string) {
 
-        this._id = (id === undefined) ? 0 : Number(id);
-        this._desc = (desc === undefined) ? "Default desc" : String(desc);
-        this._name = (name === undefined) ? "Default title" : String(name);
-        this._img = "assets/imgs/" + img;
+        this.id = (id === undefined) ? 0 : Number(id);
+        this.desc = (desc === undefined) ? "Default desc" : String(desc);
+        this.name = (name === undefined) ? "Default title" : String(name);
+        this.img = "assets/imgs/" + img;
 
     }
 
@@ -23,7 +19,7 @@ export class Marker {
         this._minimapMesh = BABYLON.MeshBuilder.CreateSphere("sphere", {
             diameter: 3
         }, scene);
-        let position = this._location.relativeLatLonTo(device);
+        let position = this.location.relativeLatLonTo(device);
 
         this._markerMesh.position = new Vector3(position.latitude(), position.longitude(), position.altitude());
 
@@ -41,7 +37,7 @@ export class Marker {
     }
 
     pointMarker(scene: Scene, device: Point) {
-        let texture = new BABYLON.Texture(this._img, scene)
+        let texture = new BABYLON.Texture(this.img, scene)
         let material = new BABYLON.StandardMaterial("mainmaterial", scene);
 
         material.opacityTexture = texture; // transparency
@@ -56,10 +52,10 @@ export class Marker {
         this._markerMesh.layerMask = 1;
 
         // direction to point from device
-        var bearing = device.bearingTo(this._location);
+        var bearing = device.bearingTo(this.location);
 
         // get a Device coord along the bearing at 900 units
-        var p = this._location.getlocationAtDistanceFrom(device, 900, bearing);
+        var p = this.location.getlocationAtDistanceFrom(device, 900, bearing);
 
         // location to world
         let position = p.relativeLatLonTo(device);
