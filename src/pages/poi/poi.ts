@@ -2,6 +2,9 @@ import { Component, AfterViewInit } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Game } from '../../app/classes/game';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { LocationsProvider } from '../../providers/locations/locations';
+import { Marker } from '../../app/classes/marker';
+import { Point } from '../../app/classes/point';
 /**
  * Generated class for the PoiPage page.
  *
@@ -16,7 +19,10 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 })
 export class PoiPage implements AfterViewInit {
 
-    constructor(public navCtrl: NavController, public navParams: NavParams, private screenOrientation: ScreenOrientation) {
+    private _game: Game;
+    private _markers: Marker[] = [];
+
+    constructor(public navCtrl: NavController, public navParams: NavParams, private screenOrientation: ScreenOrientation, private locations: LocationsProvider) {
 
         // allow rotation
         this.screenOrientation.unlock();
@@ -28,8 +34,18 @@ export class PoiPage implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        let game = new Game('renderCanvas');
-        game.createScene();
-        game.animate();
+        this._game = new Game('renderCanvas');
+        this._game.createScene();
+
+        for (var i = 0; i < this.locations.locations.length; ++i) {
+            let position = new Point(
+                Number(this.locations.locations[i].latitude),
+                Number(this.locations.locations[i].longitude),
+                0);
+            let marker = new Marker(Number(this.locations.locations[i].id),
+                this.locations.locations[i].);
+            this._markers.push(marker);
+        }
+        this._game.animate();
     }
 }
