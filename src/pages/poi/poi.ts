@@ -27,9 +27,11 @@ export class PoiPage implements AfterViewInit {
 
     private _markers: Marker[] = [];
     private _game: GameProvider;
+
     public getWidth: number;
     public getHeight: number;
     public calcWidth: number;
+
     constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
@@ -48,6 +50,10 @@ export class PoiPage implements AfterViewInit {
     
     ionViewWillEnter(){
         this.startCamera();
+        document.addEventListener('click',(e)=> {
+            let pickResult = this._game.onClick(e);
+            console.log("click *******************: "+pickResult);
+        });        
     }
     
     ionViewWillUnload(){

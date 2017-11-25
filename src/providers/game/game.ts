@@ -375,4 +375,10 @@ export class GameProvider {
         west.lookAt(Vector3.Zero());
     }
 
+    onClick(e): number {
+        let pickResult = this._scene.pick(e.clientX, e.clientY, null, null, this._camera);
+        if (pickResult.hit) {
+            return parseInt(pickResult.pickedMesh.id);
+        }
+    }
 }
