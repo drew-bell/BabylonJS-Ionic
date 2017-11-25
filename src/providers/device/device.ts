@@ -44,7 +44,6 @@ export class DeviceProvider {
         //         this.location.latitude(position.coords.latitude);
         //         this.location.longitude(position.coords.longitude);
         //         this.location.altitude(position.coords.altitude);
-
         //     });
 
     }

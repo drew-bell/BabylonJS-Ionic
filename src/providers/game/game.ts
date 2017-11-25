@@ -32,8 +32,9 @@ export class GameProvider {
 
         // movement camera
         this._camera = new DeviceOrientationCamera("DevOr_camera", new Vector3(0, 0, 0), this._scene);
-        
-        this._camera.fov =1.5;
+
+        // FOV
+        this._camera.fov = 0.8;
 
         // add to camera array
         this._scene.activeCameras.push(this._camera);
@@ -43,11 +44,12 @@ export class GameProvider {
 
         // set the sensitivity
         this._camera.angularSensibility = 10;
-    
+
         // This attaches the camera to the canvas
         this._camera.attachControl(this._canvas, false);
 
         // prevent screen touches moving the camera
+        this._camera.inputs.remove(this._camera.inputs.attached.mouse);
         this._camera.inputs.remove(this._camera.inputs.attached.keyboard);
 
         // set viewport
@@ -56,6 +58,8 @@ export class GameProvider {
         // clear background
         this._scene.clearColor = new Color4(0, 0, 0, 0.0000000000000001);
 
+        // animate
+        this.animate();
     }
 
     // animation loops
@@ -85,12 +89,14 @@ export class GameProvider {
         // set facing direction
         this._minimap.target = new Vector3(0, 0, 0.1);
 
+        // layer mask
         this._minimap.layerMask = 2;
 
+        // set viewport
         this._minimap.viewport = new Viewport(0, 0, (2) / (this._canvas.width / 100) / 1.3, (2) / (this._canvas.height / 100) / 1.3);
 
-        // ground
-        let groundTexture = new BABYLON.Texture("/assets/imgs/radar_north.png", this._scene);
+        // radar ring
+        let groundTexture = new BABYLON.Texture("assets/imgs/radar_north.png", this._scene);
         var groundMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
         groundMaterial.emissiveTexture = groundTexture;
         groundMaterial.opacityTexture = groundTexture;
@@ -108,7 +114,7 @@ export class GameProvider {
         ground.isPickable = false;
 
         // radar ring
-        var planeTexture = new BABYLON.Texture("/assets/imgs/radar_bg.png", this._scene);
+        var planeTexture = new BABYLON.Texture("assets/imgs/radar_bg.png", this._scene);
         var planeMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
         planeMaterial.emissiveTexture = planeTexture;
         planeMaterial.opacityTexture = planeTexture;
@@ -125,7 +131,7 @@ export class GameProvider {
 
         // This applies a mask to the minimap to make it a cutout circle
         var cutlayer = new BABYLON.Layer("top", null, this._scene, true);
-        var laytex = new BABYLON.Texture("/assets/imgs/roundmask.png", this._scene);
+        var laytex = new BABYLON.Texture("assets/imgs/roundmask.png", this._scene);
         cutlayer.texture = laytex;
         cutlayer.alphaTest = true;
 
@@ -139,6 +145,16 @@ export class GameProvider {
         cutlayer.onAfterRender = () => {
             this._engine.setColorWrite(true);
         };
+
+        // before drawing the minimap
+        plane.onBeforeDraw = () => {
+
+            // get camera rotation
+            var r = this._camera.rotationQuaternion.toEulerAngles()
+
+            // Apply rotation
+            plane.rotation.y = r.y;
+        }
     }
 
     addLight() {
@@ -153,23 +169,23 @@ export class GameProvider {
         this._light.excludeWithLayerMask = 1;
         for (var i = 0; i < this._scene.meshes.length; i++) {
             if (this._scene.meshes[i].layerMask == 1) {
-              this._light.excludedMeshes.push(this._scene.meshes[i]);
+                this._light.excludedMeshes.push(this._scene.meshes[i]);
             }
-          }
+        }
 
     }
 
     resize() {
 
         // resize canvas
-        this._canvas.width = window.innerWidth;
-        this._canvas.height = window.innerHeight;
+        this._canvas.width = window.screen.width;
+        this._canvas.height = window.screen.height;
 
         // viewport
         this._minimap.viewport = new Viewport(0, 0, (2) / (this._canvas.width / 100) / 1.3, (2) / (this._canvas.height / 100) / 1.3);
     }
 
-    resetToNewYRotation(rotation): void {
+    resetToNewYRotation(rotation: string): void {
 
         //can only work if this camera has a rotation quaternion already.
         if (!this._camera.rotationQuaternion) return;
@@ -219,11 +235,11 @@ export class GameProvider {
     }
 
     addMinimapMarker(marker: Marker, device: DeviceProvider): void {
-        
+
         let sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {
             diameter: 3
         }, this._scene);
-        
+
         let material = new BABYLON.StandardMaterial("minimaterial", this._scene);
 
         material.emissiveColor = Color3.White();
@@ -252,9 +268,9 @@ export class GameProvider {
         let material = new BABYLON.StandardMaterial("mainmaterial", this._scene);
 
         material.opacityTexture = texture; // transparency
-      
+
         material.emissiveTexture = texture; // texture
-      
+
         material.backFaceCulling = true; // don't need the back
 
         let mark = BABYLON.MeshBuilder.CreatePlane("box", {
@@ -269,15 +285,15 @@ export class GameProvider {
 
         // direction to point from device
         let bearing = marker.location.bearingTo(device.location);
-        
+
         // get a Device coord along the bearing at 900 units
-        let p = marker.location.getlocationAtDistanceFrom(device.location, 900, bearing);
+        let p = marker.location.getlocationAtDistanceFrom(device.location, 1000, bearing);
 
         // location to world
         let position = p.relativeLatLonTo(device.location);
-        
+
         // apply position to marker
-        mark.position = new Vector3(position.latitude(), position.longitude(), position.altitude());
+        mark.position = new Vector3(position.latitude(), position.altitude(), position.longitude());
 
         // prevent meshes overlapping
         mark.position.y = -1;
@@ -290,28 +306,28 @@ export class GameProvider {
     }
 
     cardinals(): void {
-        var nth = new Texture("/assets/imgs/north.png", this._scene)
+        var nth = new Texture("assets/imgs/north.png", this._scene)
         var n_material = new StandardMaterial("minimaterial", this._scene);
         n_material.emissiveTexture = nth;
         n_material.opacityTexture = nth; // transparency
         n_material.backFaceCulling = true; // don't need the back
         n_material.alpha = 0.5;
 
-        var eth = new Texture("/assets/imgs/east.png", this._scene)
+        var eth = new Texture("assets/imgs/east.png", this._scene)
         var e_material = new StandardMaterial("minimaterial", this._scene);
         e_material.emissiveTexture = eth;
         e_material.opacityTexture = eth; // transparency
         e_material.backFaceCulling = true; // don't need the back
         e_material.alpha = 0.5;
 
-        var sth = new Texture("/assets/imgs/south.png", this._scene)
+        var sth = new Texture("assets/imgs/south.png", this._scene)
         var s_material = new StandardMaterial("minimaterial", this._scene);
         s_material.emissiveTexture = sth;
         s_material.opacityTexture = sth; // transparency
         s_material.backFaceCulling = true; // don't need the back
         s_material.alpha = 0.5;
 
-        var wth = new Texture("/assets/imgs/west.png", this._scene)
+        var wth = new Texture("assets/imgs/west.png", this._scene)
         var w_material = new StandardMaterial("minimaterial", this._scene);
         w_material.emissiveTexture = wth;
         w_material.opacityTexture = wth; // transparency

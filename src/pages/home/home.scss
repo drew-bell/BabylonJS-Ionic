@@ -1,25 +1,11 @@
 page-home {
-    background-color:#031a44 ;
-
+    background-color: #031a44;
     .content {
-        margin-top:150px;
-        padding:0 10px;
-
-        ul {
-            list-style: none;
-            width: 100%;
-            align-content: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        li {
-            display: inline-block;
-            padding: 0;
-            margin: 0;
-            width: 46%;
-            margin-bottom: 30px;
-            margin-top: -30px;
+        padding: 0 10px;
+        background-color: #031a44;
+        #Warning {
+            margin-top: 80px;
+            color: white;
         }
         img {
             margin-top: 30px;

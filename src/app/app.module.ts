@@ -11,13 +11,15 @@ import { PoiPage } from '../pages/poi/poi';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { GameProvider } from '../providers/game/game';
 import { Geolocation } from '@ionic-native/geolocation';
+import { MainPage } from '../pages/main/main';
 
 
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    PoiPage
+    PoiPage,
+    MainPage
   ],
   imports: [
     BrowserModule,
@@ -27,7 +29,8 @@ import { Geolocation } from '@ionic-native/geolocation';
   entryComponents: [
     MyApp,
     HomePage,
-    PoiPage
+    PoiPage,
+    MainPage
   ],
   providers: [
     StatusBar,
