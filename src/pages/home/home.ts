@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { PoiPage } from '../poi/poi';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Platform } from 'ionic-angular';
 import { MainPage } from '../main/main';
@@ -19,10 +18,18 @@ export class HomePage {
     }
 
     ionViewWillEnter() {
+        if (this.plt.is("android")) {
+            this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT).then(result => console.log(result)).catch(error => console.log(error.message));
+        }
         setTimeout(() => {
             this.navCtrl.push(MainPage);
-            this.navCtrl.setRoot(MainPage);            
+            this.navCtrl.setRoot(MainPage);
         }, 3000);
     }
 
+    ionViewWillLeave() {
+        if (this.plt.is("android")) {
+            this.screenOrientation.unlock();
+        }
+    }
 }

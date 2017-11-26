@@ -1,18 +1,24 @@
 import { Point } from './point';
-import { Vector3, Mesh, Color3, Scene } from 'babylonjs';
+import { Vector3, Mesh, Color3, Scene, StandardMaterial, Texture } from 'babylonjs';
 
 export class Marker {
 
     private _minimapMesh: Mesh;
     private _markerMesh: Mesh;
+    public dist: string;
 
-    constructor(public id: number,public location: Point,public name: String,public desc: String,public img: string) {
+    constructor(public id: number, public location: Point, public name: String, public desc: String, public img: string, public device: Point) {
 
         this.id = (id === undefined) ? 0 : Number(id);
         this.desc = (desc === undefined) ? "Default desc" : String(desc);
         this.name = (name === undefined) ? "Default title" : String(name);
         this.img = "assets/imgs/" + img;
+        this.distance();
+    }
 
+    distance() {
+        let d = this.location.distanceTo(this.device);
+        this.dist = "ここから: " + (d < 1000 ? Math.floor(d) + " m" : Math.round((d / 1000) * 100) / 100 + " Km");
     }
 
     miniMapMarker(scene: Scene, device: Point) {
@@ -26,7 +32,7 @@ export class Marker {
         this._minimapMesh.position.y = 1;
 
         // apply material
-        let material = new BABYLON.StandardMaterial("minimaterial", scene);
+        let material = new StandardMaterial("minimaterial", scene);
         material.emissiveColor = Color3.White();
         this._minimapMesh.material = material
 
@@ -37,8 +43,8 @@ export class Marker {
     }
 
     pointMarker(scene: Scene, device: Point) {
-        let texture = new BABYLON.Texture(this.img, scene)
-        let material = new BABYLON.StandardMaterial("mainmaterial", scene);
+        let texture = new Texture(this.img, scene)
+        let material = new StandardMaterial("mainmaterial", scene);
 
         material.opacityTexture = texture; // transparency
         material.emissiveTexture = texture; // texture

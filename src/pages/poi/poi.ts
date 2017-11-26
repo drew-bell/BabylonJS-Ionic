@@ -1,5 +1,5 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Component, AfterViewInit } from '@angular/core';
+import { IonicPage, NavController, ModalController } from 'ionic-angular';
 import { GameProvider } from '../../providers/game/game';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { LocationsProvider } from '../../providers/locations/locations';
@@ -7,7 +7,10 @@ import { Point } from '../../app/classes/point';
 import { Marker } from '../../app/classes/marker';
 import { DeviceProvider } from '../../providers/device/device';
 import { CameraInputTypes } from 'babylonjs';
-
+import { Platform } from 'ionic-angular';
+import { ModalPage } from '../modal/modal';
+// import { AndroidPermissions } from '@ionic-native/android-permissions';
+// import { CameraPreview } from '@ionic-native/camera-preview';
 
 /**
  * Generated class for the PoiPage page.
@@ -30,47 +33,46 @@ export class PoiPage implements AfterViewInit {
 
     public getWidth: number;
     public getHeight: number;
-    public calcWidth: number;
-
+    public cameraPreview;
     constructor(
+        public modalCtrl: ModalController,
         public navCtrl: NavController,
-        public navParams: NavParams,
         private screenOrientation: ScreenOrientation,
         private locations: LocationsProvider,
-        public device: DeviceProvider, private zone: NgZone) {
+        private platform: Platform,
+        // public cameraPreview: CameraPreview,
+        public device: DeviceProvider) {
 
-        // allow rotation
-        this.screenOrientation.unlock();
-
-        this.zone.run(() => {
-            this.getWidth = window.innerWidth;
-            this.getHeight = window.innerHeight;
-        });       
+        this.cameraPreview = CameraPreview;
     }
-    
-    ionViewWillEnter(){
+
+    ionViewWillEnter() :void{
+
+        // start camera
         this.startCamera();
-        document.addEventListener('click',(e)=> {
-            let pickResult = this._game.onClick(e);
-            console.log("click *******************: "+pickResult);
-        });        
+
+        //
+        document.getElementById('renderCanvas').addEventListener('click', this.click.bind(this), true);
+
+        window.addEventListener('orientationchange', this.resize.bind(this), false);
     }
-    
-    ionViewWillUnload(){
-        this.stopCamera();               
-    }
-    
-    resize(){
+
+    ionViewCanLeave() :void{
+
+        // stop the camera 
         this.stopCamera();
-        this._game.resize();
-        this.startCamera();
+
+        // remove the event listener 
+        document.getElementById('renderCanvas').removeEventListener('click', this.click, true);
+
+        window.addEventListener('orientationchange', this.resize, false);
     }
 
-    ngAfterViewInit() {
-         window.addEventListener('orientationchange', this.resize.bind(this), false);
+    ngAfterViewInit() :void{
+        
         this._game = new GameProvider('renderCanvas');
         this._game.createScene();
-
+        
         for (var i = 0; i < this.locations.locations.length; ++i) {
             let position = new Point(
                 Number(this.locations.locations[i].latitude),
@@ -81,7 +83,8 @@ export class PoiPage implements AfterViewInit {
                 position,
                 this.locations.locations[i].name,
                 this.locations.locations[i].description,
-                this.locations.locations[i].img);
+                this.locations.locations[i].img,
+                this.device.location);
             this._markers.push(marker);
         }
 
@@ -95,29 +98,51 @@ export class PoiPage implements AfterViewInit {
             this._game.addNameMarker(this._markers[n], this.device);
             this._game.addMinimapMarker(this._markers[n], this.device);
         }
-
-        // this._game.animate();
     }
 
     calibrateTo(direction: string): void {
-        console.log(direction);
         this._game.resetToNewYRotation(direction);
     }
 
-    stopCamera(){
-        CameraPreview.stopCamera();
+    stopCamera():void {
+            // this.cameraPreview.hide();
+            this.cameraPreview.stopCamera();
     }
 
-    startCamera() {
-        CameraPreview.startCamera({
-            x: 0,
-            y: 0,
-            width: window.screen.width,
-            height: window.screen.height,
-            toBack: true,
-            camera: 'rear',
-            previewDrag: false,
-            tapPhoto: false
-        });
+    startCamera() :void{
+            this.cameraPreview.startCamera({
+                x: 0,
+                y: 0,
+                width: window.screen.width,
+                height: window.screen.height,
+                toBack: true,
+                camera: 'rear',
+                previewDrag: false,
+                tapPhoto: false
+            });
+            // this.cameraPreview.show();
+    }
+
+    resize() :void{
+        this.stopCamera();
+        this._game.resize();
+        this.startCamera();
+    }
+
+    click(e) :void{
+        let pickResult = this._game.onClick(e);
+
+        // find the marker with the correct id 
+        let picked = this._markers.find((x) => x.id === pickResult);
+        if (picked) {
+            this.openModal(picked);
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+
+    openModal(data: any): void {
+        let modal = this.modalCtrl.create(ModalPage, { 'name': data.name, 'desc': data.desc, 'dist': data.dist });
+        modal.present().then((resp) => { console.log(resp) }).catch((error) => { console.log(error) });
     }
 }

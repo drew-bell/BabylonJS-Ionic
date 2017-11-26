@@ -19,11 +19,21 @@ import { Platform } from 'ionic-angular';
 export class MainPage {
 
     constructor(public navCtrl: NavController, private screenOrientation: ScreenOrientation, public plt: Platform) {
-        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT).then(result => console.log(result)).catch(error => console.log(error.message));
+        // this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT).then(result => console.log(result)).catch(error => console.log(error.message));
     }
 
     points(event, item) {
         this.navCtrl.push(PoiPage);
     }
-
+    ionViewWillEnter() { 
+        if (this.plt.is("android")) { 
+            this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT).then(result => console.log(result)).catch(error => console.log(error.message)); 
+        } 
+    } 
+ 
+    ionViewWillLeave() { 
+        if (this.plt.is("android")) { 
+            this.screenOrientation.unlock(); 
+        } 
+    } 
 }

@@ -1,13 +1,12 @@
-.app-root ,
+.app-root,
 .app-root-md {
     background-color: transparent;
     background: transparent;
-    
 }
+
 page-poi {
     opacity: 1;
     background-color: transparent;
-
     #game {
         background-color: transparent;
         position: absolute;
@@ -15,10 +14,8 @@ page-poi {
         left: 0;
         width: 100%;
         height: 100%;
-
-        canvas {
+        .renderCanvas {
             opacity: 1;
-    
             background-color: transparent;
             position: absolute;
             top: 0;
@@ -26,7 +23,7 @@ page-poi {
             width: 100%;
             height: 100%;
         }
-        button {
+        .calibrate {
             background-color: rgb(64, 91, 131);
         }
         #north {

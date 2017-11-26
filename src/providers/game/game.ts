@@ -1,7 +1,7 @@
 import {
     Engine, Scene, Light, Viewport, Color4,
     Vector3, HemisphericLight, MeshBuilder, Quaternion,
-    DeviceOrientationCamera, ArcRotateCamera, StandardMaterial, Texture, Color3
+    DeviceOrientationCamera, ArcRotateCamera, StandardMaterial, Texture, Color3, Layer
 } from 'babylonjs';
 import { Marker } from '../../app/classes/marker';
 import { Injectable } from '@angular/core';
@@ -70,9 +70,9 @@ export class GameProvider {
         });
 
         // the canvas/window resize event handler
-        window.addEventListener('resize', () => {
-            this._engine.resize();
-        });
+        // window.addEventListener('resize', () => {
+        //     this._engine.resize();
+        // });
     }
 
     // add minimap
@@ -96,8 +96,8 @@ export class GameProvider {
         this._minimap.viewport = new Viewport(0, 0, (2) / (this._canvas.width / 100) / 1.3, (2) / (this._canvas.height / 100) / 1.3);
 
         // radar ring
-        let groundTexture = new BABYLON.Texture("assets/imgs/radar_north.png", this._scene);
-        var groundMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
+        let groundTexture = new Texture("assets/imgs/radar_north.png", this._scene);
+        var groundMaterial = new StandardMaterial("texturePlane", this._scene);
         groundMaterial.emissiveTexture = groundTexture;
         groundMaterial.opacityTexture = groundTexture;
         groundMaterial.backFaceCulling = true;
@@ -114,8 +114,8 @@ export class GameProvider {
         ground.isPickable = false;
 
         // radar ring
-        var planeTexture = new BABYLON.Texture("assets/imgs/radar_bg.png", this._scene);
-        var planeMaterial = new BABYLON.StandardMaterial("texturePlane", this._scene);
+        var planeTexture = new Texture("assets/imgs/radar_bg.png", this._scene);
+        var planeMaterial = new StandardMaterial("texturePlane", this._scene);
         planeMaterial.emissiveTexture = planeTexture;
         planeMaterial.opacityTexture = planeTexture;
         planeMaterial.backFaceCulling = true;
@@ -130,8 +130,8 @@ export class GameProvider {
         plane.isPickable = false;
 
         // This applies a mask to the minimap to make it a cutout circle
-        var cutlayer = new BABYLON.Layer("top", null, this._scene, true);
-        var laytex = new BABYLON.Texture("assets/imgs/roundmask.png", this._scene);
+        var cutlayer = new Layer("top", null, this._scene, true);
+        var laytex = new Texture("assets/imgs/roundmask.png", this._scene);
         cutlayer.texture = laytex;
         cutlayer.alphaTest = true;
 
@@ -157,7 +157,7 @@ export class GameProvider {
         }
     }
 
-    addLight() {
+    addLight(): void {
 
         // create a basic light, aiming 0,1,0 - meaning, to the sky
         this._light = new HemisphericLight("light", new Vector3(0, 30, 0), this._scene);
@@ -175,7 +175,7 @@ export class GameProvider {
 
     }
 
-    resize() {
+    resize(): void {
 
         // resize canvas
         this._canvas.width = window.screen.width;
@@ -240,7 +240,7 @@ export class GameProvider {
             diameter: 3
         }, this._scene);
 
-        let material = new BABYLON.StandardMaterial("minimaterial", this._scene);
+        let material = new StandardMaterial("minimaterial", this._scene);
 
         material.emissiveColor = Color3.White();
 
@@ -265,7 +265,7 @@ export class GameProvider {
 
         let texture = new Texture(marker.img, this._scene)
 
-        let material = new BABYLON.StandardMaterial("mainmaterial", this._scene);
+        let material = new StandardMaterial("mainmaterial", this._scene);
 
         material.opacityTexture = texture; // transparency
 
